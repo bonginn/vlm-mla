@@ -7,8 +7,8 @@ import argparse
 import json
 import os
 import re
-from collections import Counter, defaultdict
-from dataclasses import dataclass, field
+from collections import Counter
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 import torch
@@ -19,7 +19,7 @@ from tqdm import tqdm
 # Import your MLA loader
 try:
     from .load import load_llava_with_optional_mla
-except:
+except ImportError:
     from load import load_llava_with_optional_mla
 
 
@@ -228,7 +228,7 @@ class VQAEvaluator:
     def evaluate(self) -> Dict[str, Any]:
         """Run evaluation on the dataset"""
         print(f"\n{'='*60}")
-        print(f"Evaluating on VQAv2")
+        print("Evaluating on VQAv2")
         print(f"Dataset: {self.DATASET_PATH}")
         print(f"Split: {self.config.split}")
         print(f"{'='*60}\n")
@@ -388,12 +388,12 @@ class VQAEvaluator:
             return
         
         print(f"\n{'='*60}")
-        print(f"ERROR ANALYSIS")
+        print("ERROR ANALYSIS")
         print(f"{'='*60}")
         print(f"Total errors: {len(errors)} / {len(self.results)} ({len(errors)/len(self.results)*100:.1f}%)")
         
         # Show a few error examples
-        print(f"\nSample errors:")
+        print("\nSample errors:")
         for i, err in enumerate(errors[:5], 1):
             print(f"\n{i}. Question: {err.question}")
             print(f"   Predicted: {err.prediction_short}")
@@ -417,7 +417,7 @@ class VQAEvaluator:
     def print_results(self, metrics: Dict[str, Any]):
         """Pretty print evaluation results"""
         print(f"\n{'='*60}")
-        print(f"EVALUATION RESULTS")
+        print("EVALUATION RESULTS")
         print(f"{'='*60}")
         print(f"Dataset: {metrics['dataset'].upper()}")
         print(f"Split: {metrics['split']}")

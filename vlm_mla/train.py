@@ -2,16 +2,12 @@
 LLaVA-MLA Finetuning Script
 Full finetuning for MLA-converted LLaVA models
 """
-import argparse
 import os
 from dataclasses import dataclass, field
 from typing import Optional
 import torch
 from torch.utils.data import Dataset
 from transformers import (
-    AutoConfig,
-    AutoModelForVision2Seq,
-    AutoProcessor,
     Trainer,
     TrainingArguments,
     HfArgumentParser,
@@ -164,12 +160,10 @@ def collate_fn(batch, processor):
     
     # Mask out prompt tokens (only compute loss on assistant responses)
     for i, convs in enumerate(conversations):
-        input_ids = inputs['input_ids'][i]
         target_ids = labels[i]
         
         # Find ASSISTANT tokens and only keep loss on those
         text = texts[i]
-        tokenized = processor.tokenizer(text, add_special_tokens=False)
         
         # Simple heuristic: mask everything before "ASSISTANT:"
         assistant_start = text.find("ASSISTANT:")
@@ -214,7 +208,7 @@ def main():
         local_files_only=False,
     )
     
-    print(f"Model loaded successfully!")
+    print("Model loaded successfully!")
     print(f"Model type: {type(model)}")
     if hasattr(model, 'language_model'):
         print(f"Language model type: {type(model.language_model)}")
@@ -234,7 +228,8 @@ def main():
     )
     
     # Create data collator
-    data_collator = lambda batch: collate_fn(batch, processor)
+    def data_collator(batch):
+        return collate_fn(batch, processor)
     
     # Initialize trainer
     trainer = LLaVATrainer(

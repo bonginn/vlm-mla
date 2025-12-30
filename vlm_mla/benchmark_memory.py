@@ -45,8 +45,6 @@ def run_generation(
     inputs = processor(text=prompts, images=images, return_tensors="pt", padding=True)
     inputs = {k: v.to("cuda") for k, v in inputs.items()}
     # For batch, input_ids shape is [batch_size, seq_len]
-    # We'll track the average input length per sample
-    batch_size_actual = inputs["input_ids"].shape[0]
     input_seq_len = inputs["input_ids"].shape[1]
     
     torch.cuda.synchronize()
@@ -186,7 +184,7 @@ def main():
     torch_dtype = dtype_map[args.dtype]
 
     print("="*60)
-    print(f"Benchmarking Memory & Throughput")
+    print("Benchmarking Memory & Throughput")
     print(f"Target Gen Length: {args.max_new_tokens}")
     print(f"Batch Size: {args.batch_size}")
     print(f"Force Length: {args.force_length}")

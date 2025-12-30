@@ -7,7 +7,6 @@ from typing import Any, Tuple
 import torch
 from transformers import (
     AutoConfig,
-    AutoModelForCausalLM,
     AutoModelForVision2Seq,
     AutoProcessor,
     AutoTokenizer,

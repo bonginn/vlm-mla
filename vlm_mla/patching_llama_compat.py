@@ -105,7 +105,7 @@ def _mla_forward_sdpa(
                 causal_mask = causal_mask[:, :, :, :kv_len]
 
             m = None  # running max
-            l = None  # running exp sum
+            exp_sum = None  # running exp sum
             o = None  # running weighted sum (in head_dim space)
 
             # We'll reconstruct v in chunks from c_kv_all and compute scores from (k_rope, k_nope).
@@ -140,17 +140,17 @@ def _mla_forward_sdpa(
                 if m is None:
                     m = scores_max
                     p = torch.exp(scores - m)
-                    l = p.sum(dim=-1, keepdim=True)
+                    exp_sum = p.sum(dim=-1, keepdim=True)
                     o = torch.matmul(p, v_chunk)  # [bsz,n_heads,1,head_dim]
                 else:
                     m_new = torch.maximum(m, scores_max)
                     alpha = torch.exp(m - m_new)
                     p = torch.exp(scores - m_new)
-                    l = l * alpha + p.sum(dim=-1, keepdim=True)
+                    exp_sum = exp_sum * alpha + p.sum(dim=-1, keepdim=True)
                     o = o * alpha + torch.matmul(p, v_chunk)
                     m = m_new
 
-            attn_output = o / l  # [bsz,n_heads,1,head_dim]
+            attn_output = o / exp_sum  # [bsz,n_heads,1,head_dim]
             attn_output = attn_output.transpose(1, 2).contiguous().view(bsz, q_len, -1)
             attn_output = self.o_proj(attn_output)
             return attn_output, None, past_key_value
